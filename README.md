@@ -4,21 +4,6 @@
 
 ---
 
-## Tabla de contenido
-
-- [Descripción](#descripción)
-- [Características principales](#características-principales)
-- [Arquitectura](#arquitectura)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Instalación](#instalación)
-- [Uso](#uso)
-- [Modelo de datos](#modelo-de-datos)
-- [Seguridad](#seguridad)
-- [Tecnologías](#tecnologías)
-- [Equipo](#equipo)
-
----
-
 ## Descripción
 
 **AutoFill-Form** es una extensión de Chrome (Manifest V3) que permite al usuario almacenar sus datos personales de forma local y segura, y autocompletar formularios web con un solo clic. No requiere servidor externo ni conexión a la nube — toda la información vive en el navegador del usuario mediante `chrome.storage.local`.
