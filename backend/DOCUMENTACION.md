@@ -473,20 +473,3 @@ Formulario de prueba para demostrar el autofill:
 ```
 
 ---
-
-## GUÍA DE INSTALACIÓN Y DEMO (5 minutos)
-
-### Instalación
-1. Descargar y descomprimir el archivo ZIP.
-2. Abrir Chrome → `chrome://extensions`.
-3. Activar "Modo desarrollador" (esquina superior derecha).
-4. Clic en "Cargar descomprimida" → seleccionar la carpeta `autofill-extension`.
-5. La extensión aparece en la barra de Chrome con el ícono ⚡.
-
-### Script de demo (5 min)
-1. **(0:00-0:30)** Abrir la extensión → mostrar pantalla de configuración de PIN → ingresar PIN "1234".
-2. **(0:30-1:30)** Ir a la pestaña "Mis Datos" → llenar todos los campos → clic "Guardar datos".
-3. **(1:30-2:00)** Ir a la pestaña "AutoFill" → mostrar el preview de datos.
-4. **(2:00-3:30)** Abrir `test-form.html` en una pestaña → hacer clic en "AutoFill" → mostrar campos rellenados.
-5. **(3:30-4:00)** Demostrar bloqueo de sesión → reingresar PIN → volver a autofill.
-6. **(4:00-5:00)** Mostrar el código y explicar la arquitectura brevemente.
