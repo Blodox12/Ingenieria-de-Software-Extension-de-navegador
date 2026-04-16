@@ -3,54 +3,7 @@
 
 ---
 
-## A) ARQUITECTURA PROPUESTA MÍNIMA
-
-### Por qué esta arquitectura es adecuada para un MVP académico
-
 Chrome Extensions MV3 impone una separación de responsabilidades obligatoria por seguridad. En lugar de luchar contra eso, la arquitectura del MVP la aprovecha:
-
-- **Sin backend**: Todo vive en el navegador → sin costos, sin servidores, sin deploy.
-- **Sin frameworks**: HTML/CSS/JS vanilla → cualquier miembro del equipo puede leerlo y modificarlo sin curva de aprendizaje.
-- **Flujo lineal**: Popup → Background → Content Script. Cada mensaje tiene un propósito claro.
-- **chrome.storage.local**: API oficial, persistente entre sesiones, asíncrona. Perfecta para MVP.
-
----
-
-### Componentes y responsabilidades
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CHROME EXTENSION                         │
-│                                                                 │
-│  ┌──────────────┐    mensajes     ┌──────────────────────────┐  │
-│  │   popup.html │ ──────────────► │   background.js          │  │
-│  │   popup.js   │ ◄────────────── │   (Service Worker)       │  │
-│  │              │    respuestas   │                          │  │
-│  │  - UI/UX     │                 │  - Hashear PIN           │  │
-│  │  - Inputs    │                 │  - Verificar PIN         │  │
-│  │  - Pantallas │                 │  - Guardar datos         │  │
-│  │  - NO toca   │                 │  - Leer datos            │  │
-│  │    el DOM    │                 │  - Coordinar autofill    │  │
-│  │    de la web │                 │                          │  │
-│  └──────────────┘                 └──────────┬───────────────┘  │
-│                                              │ sendMessage       │
-│                                              ▼                   │
-│                                  ┌──────────────────────────┐   │
-│                                  │   content.js             │   │
-│                                  │   (inyectado en la web)  │   │
-│                                  │                          │   │
-│                                  │  - Detectar inputs/sel.  │   │
-│                                  │  - Mapear campos         │   │
-│                                  │  - Inyectar valores      │   │
-│                                  │  - Disparar eventos DOM  │   │
-│                                  └──────────────────────────┘   │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐    │
-│  │   chrome.storage.local                                   │    │
-│  │   { pin_hash: "sha256...", user_data: { nombre: "..." }} │    │
-│  └──────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
-```
 
 ### Responsabilidad de cada componente
 
@@ -61,7 +14,6 @@ Chrome Extensions MV3 impone una separación de responsabilidades obligatoria po
 | **content.js** | Manipulación del DOM de la página web | DOM de la pestaña activa |
 | **chrome.storage.local** | Persistencia de datos | Leído/escrito por background |
 
----
 
 ## B) ESTRUCTURA DE ARCHIVOS
 
@@ -78,13 +30,6 @@ autofill-extension/
     ├── icon16.png
     ├── icon48.png
     └── icon128.png
-```
-
-**Total: 6 archivos. Sin dependencias externas. Sin npm. Sin build.**
-
----
-
-## C) LÓGICA CLAVE — EXPLICACIONES
 
 ### Seguridad del PIN (la solución más simple viable para MVP)
 
@@ -98,126 +43,9 @@ async function hashPIN(pin) {
 }
 ```
 
-**¿Por qué SubtleCrypto + SHA-256?**
-- Disponible nativamente en Service Workers MV3 (sin librerías).
-- El PIN **nunca se guarda en texto plano**.
-- El salt fijo previene ataques de rainbow table básicos.
-- Para un MVP académico es más que suficiente. En producción real usaríamos bcrypt.
 
-**Lo que se guarda en storage:**
-```json
-{
-  "pin_hash": "a3f2c9d1e8b7...",
-  "user_data": {
-    "nombre": "Juan",
-    "apellido": "Pérez",
-    "email": "juan@email.com",
-    ...
-  }
-}
-```
 
-### Autofill: Mapeo de campos
-
-```javascript
-// content.js — El mapeo funciona por palabras clave en atributos HTML
-const FIELD_MAP = {
-  "nombre": "nombre",   // si el input tiene name="nombre" o id="nombre"
-  "name":   "nombre",   // o name="name" (formularios en inglés)
-  "email":  "email",
-  "phone":  "telefono",
-  // ... etc.
-};
-```
-
-Para cada `<input>` y `<select>` de la página, el content script revisa:
-`name`, `id`, `placeholder`, `autocomplete`, `aria-label`
-
-Si encuentra una coincidencia, inyecta el valor y dispara eventos `input` y `change` para compatibilidad con frameworks como React/Vue/Angular.
-
----
-
-## D) FLUJO COMPLETO PASO A PASO
-
-### Flujo 1: Primera vez — Configurar PIN
-
-```
-Usuario                    popup.js              background.js        storage
-   │                          │                       │                  │
-   │── ingresa PIN ──────────►│                       │                  │
-   │── confirma PIN ─────────►│                       │                  │
-   │                          │── SET_PIN(pin) ───────►│                  │
-   │                          │                       │── hashPIN() ─────►│
-   │                          │                       │── storage.set()──►│
-   │                          │◄── { success: true } ──│                  │
-   │◄─── "PIN configurado" ───│                       │                  │
-   │                          │── showScreen(main) ───►│                  │
-```
-
-### Flujo 2: Guardar datos personales
-
-```
-Usuario                    popup.js              background.js        storage
-   │                          │                       │                  │
-   │── llena formulario ─────►│                       │                  │
-   │── click "Guardar" ───────►│                       │                  │
-   │                          │── SAVE_DATA(data) ────►│                  │
-   │                          │                       │── storage.set()──►│
-   │                          │◄── { success: true } ──│                  │
-   │◄─── "Datos guardados" ───│                       │                  │
-```
-
-### Flujo 3: Sesiones siguientes — Verificar PIN
-
-```
-Usuario                    popup.js              background.js        storage
-   │                          │                       │                  │
-   │                          │── CHECK_PIN_EXISTS ───►│                  │
-   │                          │                       │── storage.get()──►│
-   │                          │◄── { exists: true } ───│                  │
-   │                          │── showScreen(verify) ──│                  │
-   │── ingresa PIN ──────────►│                       │                  │
-   │── click "Desbloquear" ──►│                       │                  │
-   │                          │── VERIFY_PIN(pin) ────►│                  │
-   │                          │                       │── hashPIN(pin)    │
-   │                          │                       │── storage.get()──►│
-   │                          │                       │◄─ pin_hash ───────│
-   │                          │                       │── compare hashes  │
-   │                          │◄── { success: true } ──│                  │
-   │◄─── muestra pantalla ────│                       │                  │
-│         principal            │                       │                  │
-```
-
-### Flujo 4: Ejecutar AutoFill ← El flujo más importante
-
-```
-Usuario          popup.js        background.js      content.js       Formulario web
-   │                │                  │                 │                  │
-   │─ click ───────►│                  │                 │                  │
-   │  "AutoFill"    │── AUTOFILL ─────►│                 │                  │
-   │                │                  │── GET data ─────►storage           │
-   │                │                  │◄─ user_data ─────│                 │
-   │                │                  │── tabs.query()   │                 │
-   │                │                  │   (pestaña activa)                 │
-   │                │                  │── sendMessage ──►│                 │
-   │                │                  │   DO_AUTOFILL     │                 │
-   │                │                  │   + data          │                 │
-   │                │                  │                  │─ detecta inputs►│
-   │                │                  │                  │─ mapea campos   │
-   │                │                  │                  │─ fillInput() ──►│
-   │                │                  │                  │─ fillSelect() ──►│
-   │                │                  │                  │─ dispara eventos│
-   │                │                  │◄─ { filled: 3 } ──│                │
-   │                │◄─ { success } ───│                  │                 │
-   │◄─ "3 campos ───│                  │                  │                 │
-│    rellenados"    │                  │                  │                 │
-```
-
----
-
-## E) HISTORIAS DE USUARIO
-
-### HU-01: Configurar PIN de seguridad
+### HU-01: Configurar PIN de seguridad (HU mas importantes para el MVP)
 
 **Como** usuario nuevo de la extensión,  
 **quiero** configurar un PIN de acceso,  
@@ -358,56 +186,9 @@ Usuario          popup.js        background.js      content.js       Formulario 
 - El nuevo PIN reemplaza el anterior en storage (hasheado).
 - Los datos del usuario no se borran al cambiar el PIN.
 
----
+--- Entre otros
 
-## F) RIESGOS TÉCNICOS Y MITIGACIONES
-
-### Riesgo 1: Content script no inyectado en la pestaña activa
-**Probabilidad:** Alta (páginas abiertas antes de instalar la extensión).  
-**Impacto:** El autofill no funciona.  
-**Mitigación:** En `background.js`, si `sendMessage` falla, se usa `chrome.scripting.executeScript` para inyectar `content.js` programáticamente, y luego se reintenta. **Ya está implementado en el código.**
-
----
-
-### Riesgo 2: Formularios con atributos no estándar o generados dinámicamente
-**Probabilidad:** Media (muchos frameworks generan `id` aleatorios como `mat-input-0`).  
-**Impacto:** El autofill no detecta los campos.  
-**Mitigación:** El `FIELD_MAP` cubre los atributos `name`, `id`, `placeholder`, `autocomplete`, y `aria-label`. Para el demo, usar formularios simples con atributos estándar. En 2 días, priorizar que funcione en 2-3 formularios de prueba específicos.
-
----
-
-### Riesgo 3: Páginas que restringen content scripts (CSP estricto)
-**Probabilidad:** Baja en páginas normales, alta en `chrome://` o extensiones.  
-**Impacto:** El script no se ejecuta.  
-**Mitigación:** Documentar en el video que el autofill funciona en páginas web normales, no en páginas del sistema de Chrome. Preparar un formulario HTML de prueba propio.
-
----
-
-### Riesgo 4: Datos no persisten al reiniciar Chrome
-**Probabilidad:** Muy baja (`chrome.storage.local` es persistente).  
-**Impacto:** Usuario pierde sus datos.  
-**Mitigación:** Verificar que se usa `chrome.storage.local` (no `sessionStorage`). **Ya implementado correctamente.**
-
----
-
-### Riesgo 5: El equipo no conoce JavaScript
-**Probabilidad:** Alta (mencionado en el contexto).  
-**Impacto:** Dificultad para depurar.  
-**Mitigación estratégica para 2 días:**
-1. **Día 1**: Instalar la extensión, probar el flujo PIN → guardar datos → autofill en formulario propio.
-2. **Día 2**: Probar en formularios reales, grabar el video demo, preparar artefactos.
-- Usar `console.log()` extensamente para depurar. El log del Service Worker se ve en `chrome://extensions → Service Worker → Inspect`.
-
----
-
-### Riesgo 6: Formulario de prueba no disponible
-**Probabilidad:** Media si no se prepara con anticipación.  
-**Impacto:** No hay qué mostrar en el video.  
-**Mitigación:** Crear un `test-form.html` local con campos estándar. **Archivo incluido abajo.**
-
----
-
-## ARCHIVO BONUS: test-form.html
+## ARCHIVO BONUS PARA HACER PRUEBAS: test-form.html
 
 Formulario de prueba para demostrar el autofill:
 
