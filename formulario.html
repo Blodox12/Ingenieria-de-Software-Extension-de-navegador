@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WorkHub — Aplicar a Empleo</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── FORM PAGE STYLES ── */
+    .form-hero {
+      background: var(--navy);
+      background-image:
+        radial-gradient(ellipse at 70% 50%, rgba(30,64,175,0.35) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 80%, rgba(59,130,246,0.15) 0%, transparent 50%);
+      padding: 56px 5% 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+
+    .back-link:hover { color: var(--white); }
+
+    .form-hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .form-hero p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.95rem;
+      font-weight: 300;
+    }
+
+    .form-wrapper {
+      max-width: 720px;
+      margin: 48px auto;
+      padding: 0 5% 60px;
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1.5px solid var(--gray-200);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .form-section-header {
+      background: var(--navy);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .form-section-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--blue-bright);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .form-body {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .form-section {
+      padding-bottom: 28px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .form-section:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .icon { font-size: 1rem; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row.full { grid-template-columns: 1fr; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group label .req {
+      color: var(--blue-bright);
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 12px 16px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      background: var(--gray-100);
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--blue-bright);
+      background: #eff6ff;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--gray-400);
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--gray-200);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--gray-100);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--blue-bright);
+      background: #eff6ff;
+    }
+
+    .upload-zone .upload-icon { font-size: 2rem; margin-bottom: 10px; }
+    .upload-zone p { font-size: 0.88rem; color: var(--text-soft); }
+    .upload-zone span { font-size: 0.78rem; color: var(--gray-400); }
+    .upload-zone input[type="file"] { display: none; }
+
+    /* Checkboxes */
+    .check-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue-bright);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .check-item span {
+      font-size: 0.88rem;
+      color: var(--text-soft);
+    }
+
+    /* Submit */
+    .form-submit {
+      padding: 24px 32px;
+      background: var(--gray-100);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .submit-note {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      max-width: 340px;
+    }
+
+    .submit-note strong { color: var(--text-soft); }
+
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      padding: 14px 36px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-submit:hover {
+      background: var(--blue);
+      box-shadow: 0 6px 24px rgba(30,64,175,0.35);
+      transform: translateY(-2px);
+    }
+
+    /* Success message (hidden by default) */
+    .success-msg {
+      display: none;
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: center;
+      margin: 0 32px 32px;
+    }
+
+    .success-msg.show { display: block; animation: fadeUp 0.4s ease; }
+    .success-msg .check { font-size: 2rem; margin-bottom: 8px; }
+    .success-msg h3 { font-family: 'Syne', sans-serif; font-size: 1rem; color: #15803d; }
+    .success-msg p { font-size: 0.85rem; color: #166534; }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-body { padding: 20px; }
+      .form-submit { flex-direction: column; align-items: stretch; }
+      .btn-submit { text-align: center; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-dot"></span>
+      WorkHub
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Página Principal</a></li>
+      <li><a href="ofertas.html" class="active">Ofertas Laborales</a></li>
+      <li><a href="#">Empresas</a></li>
+      <li><a href="#">Contáctanos</a></li>
+    </ul>
+    <button class="nav-cta">Crear Perfil</button>
+  </nav>
+
+  <!-- FORM HERO -->
+  <header class="form-hero">
+    <a href="ofertas.html" class="back-link">← Volver a ofertas laborales</a>
+    <h1>Aplicar a <span class="highlight">Empleo</span></h1>
+    <p>Completa el formulario con tus datos. El proceso toma menos de 5 minutos.</p>
+  </header>
+
+  <!-- FORM -->
+  <div class="form-wrapper">
+    <div class="form-card">
+
+      <div class="form-section-header">
+        <div class="step-num">✦</div>
+        <h2>Formulario de Aplicación — WorkHub</h2>
+      </div>
+
+      <div class="form-body">
+
+        <!-- DATOS PERSONALES -->
+        <div class="form-section">
+          <p class="section-title"><span class="icon">👤</span> Datos personales</p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre <span class="req">*</span></label>
+              <input type="text" placeholder="Nombre" />
+            </div>
+            <div class="form-group">
+              <label>Apellido <span class="req">*</span></label>
+              <input type="text" placeholder="Apellido" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Correo electrónico <span class="req">*</span></label>
+              <input type="email" placeholder="Correo Electronico" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Teléfono celular <span class="req">*</span></label>
+              <input type="tel" placeholder="Telefono" />
+            </div>
+            <div class="form-group">
+              <label>Teléfono fijo</label>
+              <input type="tel" placeholder="Telefono fijo" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Documento de identidad <span class="req">*</span></label>
+              <input type="text" placeholder="Número de cédula" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fecha de nacimiento</label>
+              <input type="text" placeholder="Fecha de nacimiento" />
+            </div>
+            <div class="form-group">
+              <label>Lugar de nacimiento</label>
+              <input type="text" placeholder="Lugar de nacimiento" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nacionalidad</label>
+              <input type="text" placeholder="Pais" />
+            </div>
+            <div class="form-group">
+              <label>Estado civil</label>
+              <input type="text" placeholder="Estado civil" />
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Dirección de residencia</label>
+              <input type="text" placeholder="Direccion" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ciudad de residencia <span class="req">*</span></label>
+              <input type="text" placeholder="Ciudad" />
+            </div>
+            <div class="form-group">
+              <label>Departamento</label>
+              <input type="text" placeholder="Departamento" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Código postal</label>
+              <input type="text" placeholder="Codigo postal" />
+            </div>
+            <div class="form-group">
+              <label>Perfil de LinkedIn</label>
+              <input type="text" placeholder="Link Linkedin" />
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPERIENCIA -->
+        <div class="form-section">
+          <p class="section-title"><span class="icon">💼</span> Experiencia y formación</p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cargo al que aplica <span class="req">*</span></label>
+              <input type="text" placeholder="Cargo a postular" />
+            </div>
+            <div class="form-group">
+              <label>Años de experiencia <span class="req">*</span></label>
+              <input type="text" placeholder="Experiencia" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Empresa actual</label>
+              <input type="text" placeholder="Empresa actual" />
+            </div>
+            <div class="form-group">
+              <label>Cargo actual o más reciente</label>
+              <input type="text" placeholder="Cargo Actual" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fecha de inicio (empleo actual)</label>
+              <input type="text" placeholder="MM/AAAA" />
+            </div>
+            <div class="form-group">
+              <label>Fecha de fin (dejar vacío si es actual)</label>
+              <input type="text" placeholder="MM/AAAA" />
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Funciones principales en empleo actual</label>
+              <input type="text" placeholder="Funciones" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nivel educativo más alto</label>
+              <input type="text" placeholder="Nivel educativo" />
+            </div>
+            <div class="form-group">
+              <label>Título obtenido</label>
+              <input type="text" placeholder="Titulo" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Universidad o institución de graduación</label>
+              <input type="text" placeholder="Universidad o institución" />
+            </div>
+            <div class="form-group">
+              <label>Año de graduación</label>
+              <input type="text" placeholder="Año Graduacion" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Idiomas que dominas</label>
+              <input type="text" placeholder="Idiomas" />
+            </div>
+            <div class="form-group">
+              <label>Pretensión salarial (COP/mes)</label>
+              <input type="text" placeholder="Salario Objetivo" />
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Que certificaciones o cursos posee</label>
+              <input type="text" placeholder="Certificaciones o cursos" />
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Carta de presentación</label>
+              <textarea placeholder="Cuéntanos por qué eres el candidato ideal para este cargo..."></textarea>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- DISPONIBILIDAD -->
+        <div class="form-section">
+          <p class="section-title"><span class="icon">🗓️</span> Disponibilidad</p>
+          <div class="check-group">
+            <label class="check-item">
+              <input type="checkbox" checked />
+              <span>Disponible de inmediato</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" />
+              <span>Disponible para trabajo remoto</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" />
+              <span>Disponible para viajes ocasionales</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" />
+              <span>Acepto que mis datos sean usados para otras ofertas futuras</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SUCCESS MSG -->
+      <div class="success-msg" id="successMsg">
+        <div class="check">✅</div>
+        <h3>¡Aplicación enviada con éxito!</h3>
+        <p>Hemos recibido tu formulario. Te contactaremos pronto al correo registrado.</p>
+      </div>
+
+      <!-- SUBMIT AREA -->
+      <div class="form-submit">
+        <p class="submit-note"><strong>Nota:</strong> Al enviar confirmas que la información proporcionada es verídica y completa.</p>
+        <button class="btn-submit" onclick="handleSubmit()">Enviar aplicación →</button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-dot"></span> WorkHub
+        <p>Conectando talento con oportunidades reales.</p>
+      </div>
+      <p class="footer-copy">© Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script>
+    function handleSubmit() {
+      const msg = document.getElementById('successMsg');
+      msg.classList.add('show');
+      msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.querySelector('.btn-submit').disabled = true;
+      document.querySelector('.btn-submit').textContent = '✓ Enviado';
+      document.querySelector('.btn-submit').style.background = '#15803d';
+    }
+
+    // Drag and drop visual feedback
+    const zone = document.querySelector('.upload-zone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--blue-bright)'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--gray-200)'; });
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.style.borderColor = 'var(--gray-200)';
+      const file = e.dataTransfer.files[0];
+      if (file) zone.querySelector('p').innerHTML = `📄 <strong>${file.name}</strong> listo para enviar`;
+    });
+
+    document.getElementById('cv-upload').addEventListener('change', function() {
+      if (this.files[0]) zone.querySelector('p').innerHTML = `📄 <strong>${this.files[0].name}</strong> listo para enviar`;
+    });
+  </script>
+
+</body>
+</html>

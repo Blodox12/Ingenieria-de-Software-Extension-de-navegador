@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WorkHub — Ofertas Laborales</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-dot"></span>
+      WorkHub
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Página Principal</a></li>
+      <li><a href="#" class="active">Ofertas Laborales</a></li>
+      <li><a href="#">Empresas</a></li>
+      <li><a href="#">Contáctanos</a></li>
+    </ul>
+    <button class="nav-cta">Crear Perfil</button>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <header class="hero">
+    <div class="hero-tag">🔍 Nuevas oportunidades disponibles</div>
+    <h1 class="hero-title">Encuentra tu <br/><span class="highlight">próximo empleo</span></h1>
+    <p class="hero-sub">Explora más de 200 ofertas activas de empresas verificadas. <br/>Desde tecnología hasta salud, tu carrera empieza aquí.</p>
+    <div class="search-bar">
+      <input type="text" placeholder="Cargo, empresa o habilidad..." />
+      <select>
+        <option>Todas las ciudades</option>
+        <option>Bogotá</option>
+        <option>Medellín</option>
+        <option>Remoto</option>
+      </select>
+      <button>Buscar</button>
+    </div>
+  </header>
+
+  <!-- FILTROS -->
+  <section class="filters-section">
+    <span class="filter-label">Filtrar por:</span>
+    <div class="filter-chips">
+      <button class="chip active">Todos</button>
+      <button class="chip">Tiempo completo</button>
+      <button class="chip">Medio tiempo</button>
+      <button class="chip">Remoto</button>
+      <button class="chip">Tecnología</button>
+      <button class="chip">Salud</button>
+      <button class="chip">Diseño</button>
+      <button class="chip">Administración</button>
+    </div>
+  </section>
+
+  <!-- GRID DE OFERTAS -->
+  <main class="jobs-grid">
+
+    <article class="job-card featured">
+      <div class="card-top">
+        <div class="company-logo tech">💻</div>
+        <span class="badge badge-featured">Destacado</span>
+      </div>
+      <h2 class="job-title">Se busca Desarrollador Full Stack</h2>
+      <p class="company-name">NovaTech Solutions · Medellín / Remoto</p>
+      <p class="job-desc">Únete a nuestro equipo de ingeniería para construir plataformas web escalables. Trabajarás con React, Node.js y bases de datos en la nube.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 3–5 años de experiencia</li>
+        <li><span class="icon">💰</span> $4.500.000 – $7.000.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Remoto disponible</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">React</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">AWS</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo health">🏥</div>
+        <span class="badge badge-new">Nuevo</span>
+      </div>
+      <h2 class="job-title">Se busca Enfermero/a Profesional</h2>
+      <p class="company-name">Clínica San Rafael · Bogotá</p>
+      <p class="job-desc">Buscamos profesional en enfermería para atención hospitalaria en UCI. Horarios rotativos y excelentes beneficios de salud.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 2+ años de experiencia</li>
+        <li><span class="icon">💰</span> $3.200.000 – $4.800.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Presencial</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">UCI</span>
+          <span class="tag">Turnos rotativos</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo design">🎨</div>
+        <span class="badge badge-urgent">Urgente</span>
+      </div>
+      <h2 class="job-title">Se busca Diseñador UX/UI Senior</h2>
+      <p class="company-name">Pixel Studio · Cali / Híbrido</p>
+      <p class="job-desc">Lidera el diseño de productos digitales para clientes internacionales. Dominio de Figma, sistemas de diseño y design thinking indispensable.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 4+ años de experiencia</li>
+        <li><span class="icon">💰</span> $5.000.000 – $8.500.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Híbrido</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">Figma</span>
+          <span class="tag">Design Systems</span>
+          <span class="tag">UX Research</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo finance">📊</div>
+        <span class="badge badge-new">Nuevo</span>
+      </div>
+      <h2 class="job-title">Se busca Contador/a Público/a</h2>
+      <p class="company-name">Grupo Empresarial Andino · Medellín</p>
+      <p class="job-desc">Responsable de estados financieros, declaraciones tributarias y auditoría interna. Manejo de software SIIGO o World Office requerido.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 2–4 años de experiencia</li>
+        <li><span class="icon">💰</span> $2.800.000 – $4.200.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Presencial</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">SIIGO</span>
+          <span class="tag">Tributaria</span>
+          <span class="tag">NIIF</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo education">📚</div>
+      </div>
+      <h2 class="job-title">Se busca Docente de Matemáticas</h2>
+      <p class="company-name">Colegio Bilingüe Horizonte · Barranquilla</p>
+      <p class="job-desc">Buscamos docente apasionado para grados 9°–11°. Enfoque en pensamiento crítico y preparación para pruebas ICFES y SAT.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 1–3 años de experiencia</li>
+        <li><span class="icon">💰</span> $2.500.000 – $3.500.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Presencial</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">ICFES</span>
+          <span class="tag">Pedagogía</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo marketing">📣</div>
+        <span class="badge badge-featured">Destacado</span>
+      </div>
+      <h2 class="job-title">Se busca Especialista en Marketing Digital</h2>
+      <p class="company-name">BrandBoost Agency · Remoto</p>
+      <p class="job-desc">Gestión de campañas en Meta Ads y Google Ads, estrategia de contenidos, análisis de métricas y crecimiento de comunidades digitales.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 2–4 años de experiencia</li>
+        <li><span class="icon">💰</span> $3.000.000 – $5.500.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> 100% Remoto</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">Meta Ads</span>
+          <span class="tag">Google Ads</span>
+          <span class="tag">SEO</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo legal">⚖️</div>
+        <span class="badge badge-urgent">Urgente</span>
+      </div>
+      <h2 class="job-title">Se busca Abogado/a Corporativo/a</h2>
+      <p class="company-name">Montoya & Asociados · Bogotá</p>
+      <p class="job-desc">Asesoría legal en contratos mercantiles, derecho societario y litigios corporativos. Inglés avanzado indispensable para clientes internacionales.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 3–6 años de experiencia</li>
+        <li><span class="icon">💰</span> $6.000.000 – $10.000.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Presencial</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">Derecho comercial</span>
+          <span class="tag">Inglés C1</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+    <article class="job-card">
+      <div class="card-top">
+        <div class="company-logo logistics">🚛</div>
+        <span class="badge badge-new">Nuevo</span>
+      </div>
+      <h2 class="job-title">Se busca Coordinador/a de Logística</h2>
+      <p class="company-name">LogiCargo S.A.S · Bucaramanga</p>
+      <p class="job-desc">Supervisión de cadena de suministro, coordinación de transportistas y optimización de rutas de distribución a nivel nacional.</p>
+      <ul class="job-details">
+        <li><span class="icon">📅</span> 2–3 años de experiencia</li>
+        <li><span class="icon">💰</span> $2.800.000 – $4.000.000 COP/mes</li>
+        <li><span class="icon">🕐</span> Tiempo completo</li>
+        <li><span class="icon">📍</span> Presencial</li>
+      </ul>
+      <div class="card-footer">
+        <div class="tags">
+          <span class="tag">Supply Chain</span>
+          <span class="tag">WMS</span>
+          <span class="tag">Excel avanzado</span>
+        </div>
+        <a href="formulario.html" class="btn-apply">Aplicar →</a>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-dot"></span> WorkHub
+        <p>Conectando talento con oportunidades reales.</p>
+      </div>
+      <div class="footer-links">
+        <span>Página Principal</span>
+        <span>Ofertas Laborales</span>
+        <span>Empresas</span>
+        <span>Contáctanos</span>
+      </div>
+      <p class="footer-copy">© 2025 WorkHub. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
