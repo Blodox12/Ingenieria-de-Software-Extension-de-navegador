@@ -41,12 +41,9 @@ La comunicación entre capas es asíncrona mediante `chrome.runtime.sendMessage`
 
 ## Instalación
 
-Como la extensión aún no está publicada en la Chrome Web Store, se instala en modo desarrollador:
+Como la extensión aún no está publicada en la Chrome Web Store, se instala en modo desarrollador
 
-1. Clona el repositorio:
-   ```bash
-   git clone https://github.com/Blodox12/Ingenieria-de-Software-Extension-de-navegador.git
-   ```
+1. Descargar la carpeta de Autoform-filler y descomprimirla.
 
 2. Abre Google Chrome y ve a `chrome://extensions/`.
 
@@ -54,7 +51,7 @@ Como la extensión aún no está publicada en la Chrome Web Store, se instala en
 
 4. Haz clic en **"Cargar descomprimida"** y selecciona la carpeta del proyecto.
 
-5. La extensión aparecerá en la barra de herramientas de Chrome.
+5. La extensión ahora aparecerá en la barra de herramientas de Chrome y esta lista para ejecutarse
 
 > También compatible con **Microsoft Edge**: ve a `edge://extensions/` y sigue los mismos pasos.
 
