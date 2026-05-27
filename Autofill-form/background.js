@@ -140,7 +140,7 @@ async function setAiEnabled(enabled) {
 }
 
 async function askGeminiToMapFields(unresolvedFields, userData) {
-  const API_KEY = "AIzaSyBJDqx03G6SmY1_HbulPci5bOwZdHYdoYw";
+  const API_KEY = "YOUR_API_KEY"; //removed becuse it's sensitive information, please replace with your actual API key
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
   // Cada campo tiene una propiedad _key. Gemini debe usar ese valor exacto como clave en su respuesta.
