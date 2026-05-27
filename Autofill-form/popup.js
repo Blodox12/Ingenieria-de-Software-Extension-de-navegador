@@ -158,6 +158,55 @@ function renderCustomFields() {
   });
 }
 
+// ─── Renderizar historial de autofills ───────────────────────────────────────
+async function renderHistory() {
+  const container = document.getElementById("history-list");
+  if (!container) return;
+
+  try {
+    const res = await sendMsg({ action: "GET_HISTORY" });
+    const history = res.history || [];
+
+    if (history.length === 0) {
+      container.innerHTML = `<div class="history-empty">No hay ejecuciones registradas aún.</div>`;
+      return;
+    }
+
+    container.innerHTML = history.map((entry) => {
+      const date = new Date(entry.timestamp);
+      const dateStr = date.toLocaleDateString("es-CO", { day: "2-digit", month: "short" });
+      const timeStr = date.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+
+      // Extraer dominio legible de la URL
+      let displayUrl = entry.url || "—";
+      try { displayUrl = new URL(entry.url).hostname.replace("www.", ""); } catch (_) {}
+
+      const statusTag = entry.success
+        ? `<span class="h-tag ok">✅ OK</span>`
+        : `<span class="h-tag fail">⚠️ Sin campos</span>`;
+
+      const countTag = entry.filled > 0
+        ? `<span class="h-tag cnt">${entry.filled} campo${entry.filled !== 1 ? "s" : ""}</span>`
+        : "";
+
+      const aiTag = entry.aiUsed
+        ? `<span class="h-tag ai">🤖 IA +${entry.aiFields}</span>`
+        : "";
+
+      return `
+        <div class="history-entry">
+          <div class="h-top">
+            <span class="h-url" title="${entry.url}">${displayUrl}</span>
+            <span class="h-date">${dateStr} ${timeStr}</span>
+          </div>
+          <div class="h-tags">${statusTag}${countTag}${aiTag}</div>
+        </div>`;
+    }).join("");
+  } catch (err) {
+    container.innerHTML = `<div class="history-empty">Error cargando historial.</div>`;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // INICIALIZACIÓN
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -176,11 +225,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     showScreen("screen-setup-pin");
   }
 
+  // ── Toggle IA: cargar preferencia guardada ────────────────────────────────
+  try {
+    const aiRes = await sendMsg({ action: "GET_AI_ENABLED" });
+    document.getElementById("toggle-ai").checked = aiRes.enabled !== false;
+  } catch (_) {}
+
+  document.getElementById("toggle-ai").addEventListener("change", async (e) => {
+    await sendMsg({ action: "SET_AI_ENABLED", enabled: e.target.checked });
+  });
+
   // ── Tabs ──────────────────────────────────────────────────────────────────
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       showTab(tab.dataset.tab);
+      if (tab.dataset.tab === "tab-history") renderHistory();
     });
+  });
+
+  // ── Limpiar historial ──────────────────────────────────────────────────────
+  document.getElementById("btn-clear-history").addEventListener("click", async () => {
+    await sendMsg({ action: "CLEAR_HISTORY" });
+    renderHistory();
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -335,10 +401,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const res = await sendMsg({ action: "AUTOFILL" });
+      let message = res.message || (res.success ? "✅ Autofill completado." : "No se pudo completar el autofill.");
+
+      if (res.aiInfo) {
+        message += ` IA usada: ${res.aiInfo.used ? "sí" : "no"}.`;
+        message += ` Campos enviados a IA: ${res.aiInfo.fieldsSent}.`;
+        if (res.aiInfo.used) {
+          message += ` Campos rellenados por IA: ${res.aiInfo.filled}.`;
+        }
+        if (res.aiInfo.error) {
+          message += ` Error IA: ${res.aiInfo.error}.`;
+        }
+      }
+
       if (res.success) {
-        showStatus("status-autofill", res.message || "✅ Autofill completado.", "ok");
+        showStatus("status-autofill", message, "ok");
       } else {
-        showStatus("status-autofill", res.message || res.error || "No se pudo completar el autofill.", "warn");
+        showStatus("status-autofill", message, "warn");
       }
     } catch (err) {
       showStatus("status-autofill", "Error: " + err.message, "err");

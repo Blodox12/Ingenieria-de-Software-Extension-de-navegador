@@ -57,35 +57,25 @@ class FieldResolver {
     this.userData = userData;
   }
 
-  /**
-   * Súper-Normalización: minúsculas, sin acentos y SIN caracteres especiales/espacios.
-   * Esto hace que "fecha_nacimiento" y "Fecha Nacimiento" se vuelvan "fechanacimiento".
-   */
   normalize(str) {
     if (!str) return "";
     return str
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Quita acentos
-      .replace(/[^a-z0-9]/g, "")      // Quita espacios, guiones, puntos y símbolos
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "")
       .trim();
   }
 
-  /**
-   * Resuelve el campo comparando el atributo contra el MAPA y las claves de USUARIO.
-   */
   resolveFromAttribute(attrValue) {
     if (!attrValue) return null;
-    const normalizedAttr = this.normalize(attrValue); // Ej: "fechanacimiento"
+    const normalizedAttr = this.normalize(attrValue);
 
     const SHORT_KEYWORDS = new Set(["tel", "zip", "dni", "mail"]);
 
-    // 1. Prioridad: Mapeo canónico
     for (const keyword of Object.keys(FIELD_MAP)) {
       const normKw = this.normalize(keyword);
       if (SHORT_KEYWORDS.has(normKw)) {
-        // Para keywords cortas seguimos validando que no sea parte de otra palabra
-        // Pero usamos una versión simplificada del regex post-normalización
         const pattern = new RegExp(`(^|[^a-z0-9])${normKw}([^a-z0-9]|$)`);
         if (pattern.test(normalizedAttr)) return FIELD_MAP[keyword];
       } else {
@@ -93,9 +83,8 @@ class FieldResolver {
       }
     }
 
-    // 2. Coincidencia con claves personalizadas del usuario (Ej: fecha_nacimiento)
     for (const userKey of Object.keys(this.userData)) {
-      const normalizedUserKey = this.normalize(userKey); // "fecha_nacimiento" -> "fechanacimiento"
+      const normalizedUserKey = this.normalize(userKey);
       if (normalizedAttr.includes(normalizedUserKey)) {
         return userKey;
       }
@@ -208,24 +197,170 @@ class AutofillEngine {
 // ─── Listener de mensajes ────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "DO_AUTOFILL") {
-    try {
-      const engine = new AutofillEngine(message.data);
-      const count  = engine.run();
+    (async () => {
+      try {
+        const engine = new AutofillEngine(message.data);
+        let filledCount = engine.run();
 
-      if (count > 0) {
-        sendResponse({
-          success: true,
-          message: `✅ ${count} campo(s) rellenado(s) correctamente.`,
-        });
-      } else {
-        sendResponse({
-          success: false,
-          message: "⚠️ No se encontraron campos compatibles en este formulario.",
-        });
+        const unresolvedFields = getUnresolvedFields();
+        console.log("Autofill: campos rellenados por automapeo:", filledCount, "campos pendientes:", unresolvedFields.length);
+
+        const aiInfo = {
+          used: false,
+          filled: 0,
+          error: null,
+          fieldsSent: unresolvedFields.length,
+        };
+
+        // Solo invocar IA si el background lo permite (flag useAI)
+        const aiEnabled = message.useAI !== false;
+
+        if (aiEnabled && unresolvedFields.length > 0 && message.data) {
+          console.log("Autofill: campos no resueltos enviados a IA:", unresolvedFields);
+
+          const aiResponse = await new Promise((resolve) => {
+            chrome.runtime.sendMessage(
+              {
+                action: "USE_AI_FALLBACK",
+                fields: unresolvedFields,
+                userData: message.data,
+              },
+              resolve
+            );
+          });
+
+          if (aiResponse) {
+            if (aiResponse.success && aiResponse.mapping) {
+              aiInfo.used = true;
+              aiInfo.filled = fillFieldsWithAI(aiResponse.mapping);
+              filledCount += aiInfo.filled;
+              console.log("Autofill IA: mapeo recibido", aiResponse.mapping);
+            } else {
+              aiInfo.error = aiResponse.error || "Fallo al recibir respuesta de IA";
+              console.warn("Autofill IA falló:", aiInfo.error, aiResponse);
+            }
+          } else {
+            aiInfo.error = "No se recibió respuesta de la acción USE_AI_FALLBACK.";
+            console.warn(aiInfo.error);
+          }
+
+          console.log("Autofill IA: resultado", aiInfo);
+        }
+
+        const messageParts = [];
+        if (filledCount > 0) {
+          messageParts.push(`✅ ${filledCount} campo(s) rellenado(s) correctamente.`);
+        }
+        if (aiInfo.used) {
+          messageParts.push(`IA rellenó ${aiInfo.filled} campo(s).`);
+        } else if (aiInfo.fieldsSent > 0) {
+          messageParts.push(`IA no rellenó campos adicionales.${aiInfo.error ? ' Error: ' + aiInfo.error : ''}`);
+        }
+
+        if (filledCount > 0) {
+          sendResponse({ success: true, message: messageParts.join(' '), filledCount, aiInfo });
+        } else {
+          sendResponse({
+            success: false,
+            message: `⚠️ No se encontraron campos compatibles en este formulario.${aiInfo.error ? ' Error IA: ' + aiInfo.error : ''}`,
+            filledCount: 0,
+            aiInfo,
+          });
+        }
+      } catch (err) {
+        sendResponse({ success: false, message: "Error: " + err.message });
       }
-    } catch (err) {
-      sendResponse({ success: false, message: "Error: " + err.message });
-    }
-    return true; 
+    })();
+    return true;
   }
 });
+
+// ─── getUnresolvedFields ─────────────────────────────────────────────────────
+// Recoge los campos que quedaron vacíos tras el motor local.
+// Asigna una _key única a cada campo para que Gemini la use como clave de respuesta
+// y fillFieldsWithAI pueda encontrar el elemento en el DOM.
+function getUnresolvedFields() {
+  const unresolved = [];
+  const inputs = document.querySelectorAll(
+    'input[type="text"], input[type="email"], input[type="tel"], ' +
+    'input[type="number"], input[type="date"], input:not([type]), select, textarea'
+  );
+
+  inputs.forEach((input, index) => {
+    // Ignorar campos que no deben rellenarse
+    if (
+      input.disabled ||
+      input.readOnly ||
+      input.type === "hidden" ||
+      input.type === "submit" ||
+      input.type === "button" ||
+      input.type === "checkbox" ||
+      input.type === "radio" ||
+      input.type === "password" ||
+      input.value  // ya fue rellenado por el motor local
+    ) return;
+
+    // Texto del label asociado para dar contexto a la IA
+    const labelEl = input.id
+      ? document.querySelector(`label[for="${input.id}"]`)
+      : null;
+    const contextText =
+      labelEl?.innerText?.trim() ||
+      input.closest("label")?.innerText?.trim() ||
+      "";
+
+    // _key: identificador único que se usará como clave en el JSON de respuesta de Gemini
+    // Preferimos id > name > índice generado
+    const _key = input.id || input.name || `field_autofill_${index}`;
+
+    // Si no hay ni id ni name, marcamos el elemento con un atributo temporal
+    // para poder encontrarlo luego en fillFieldsWithAI
+    if (!input.id && !input.name) {
+      input.setAttribute("data-autofill-key", _key);
+    }
+
+    unresolved.push({
+      _key,
+      id: input.id || "",
+      name: input.name || "",
+      placeholder: input.placeholder || "",
+      type: input.type || "text",
+      contextText,
+    });
+  });
+
+  return unresolved;
+}
+
+// ─── fillFieldsWithAI ────────────────────────────────────────────────────────
+// Recibe el mapping { _key: valor } devuelto por Gemini y rellena los elementos.
+function fillFieldsWithAI(mapping) {
+  let filled = 0;
+
+  for (const [key, value] of Object.entries(mapping)) {
+    if (!key || value == null || value === "") continue;
+
+    // Buscar el elemento por id, luego por name, luego por data-autofill-key
+    const element =
+      document.getElementById(key) ||
+      document.getElementsByName(key)[0] ||
+      document.querySelector(`[data-autofill-key="${key}"]`);
+
+    if (!element) continue;
+
+    element.focus();
+    element.value = String(value);
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+    element.blur();
+
+    filled++;
+  }
+
+  // Limpiar los atributos temporales
+  document.querySelectorAll("[data-autofill-key]").forEach((el) => {
+    el.removeAttribute("data-autofill-key");
+  });
+
+  return filled;
+}
